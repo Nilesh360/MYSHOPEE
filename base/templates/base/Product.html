@@ -1,0 +1,11 @@
+{% extends 'main.html' %}
+{% block content %}
+
+<h3>{{product.name}}</h3>
+<h3>{{product.price}}</h3>
+<h5>{{product.description}}</h5>
+<h6>{{product.Category.name}}</h6>
+<a href="{% url 'update-product' product.id %}"><span>Edit</span></a>
+<a href="{% url 'delete-product' product.id %}"><span>Delete</span></a>
+
+{% endblock %}

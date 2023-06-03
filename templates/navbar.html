@@ -14,7 +14,7 @@
             <a class="nav-link" href="#">About</a>
           </li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <a class="nav-link dropdown-toggle" href="{% url 'navbar' %}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Categories
             </a>
             <ul class="dropdown-menu">
@@ -22,36 +22,35 @@
               <li><a class="dropdown-item" href="#">Fashion</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="#">Mobile</a></li>
-              <li><a class="dropdown-item" href="#">Appliances</a></li> 
+              <li><a class="dropdown-item" href="#">Appliances</a></li> -->
               {% for category in categories %}
               <li><a class="dropdown-item" href="{% url 'search-product'%}?q={{category.name}}">{{ category.name }}</a></li>
-              {% endfor %}-->
+              {% endfor %}
             </ul>
           </li>
         </ul>
         <div>
-            <form class="d-flex" role="search" method="GET" action="#">
+            <form class="d-flex" role="search" method="GET" action="{% url 'search-product' %}">
                 <input class="form-control me-2" type="search" placeholder="MYSHOPEE.." aria-label="Search" name="q">
                 
               </form>
         </div>
         <div class="login_cart">
-          <h3> {{request.user.username}} </h3>
         {% if request.user.is_authenticated %}
         <div class="login_bar">
-          <a href="#">
+          <a href="{% url 'logout' %}">
               <img src="{% static 'images/avatar.svg' %}" />
-              <p>@{{user.username}}</p>
+              <p>@{{user.username}}</p>  
             </a>
       </div>
-        {% else %}
+        {% else %}   
         <div class="login_bar">
-            <a href="#">
+            <a href="{% url 'login' %}">
                 <img src="{% static 'images/avatar.svg' %}" />
                 <p>Login</p>
               </a>
         </div>
-        {% endif %}
+        {% endif %}   
         <div class="cart">
             <a class="cart_link" href="#"><img src="{% static 'images/cart_img.jpg' %}"/><span>Cart</span></a> 
         </div>
