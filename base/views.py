@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.contrib.auth.forms import UserCreationForm
-from .models import Product,Category,User
+from .models import Product,Category,User,cart
 from .forms import ProductForm
 from django.core.paginator import Paginator
 from django.views.decorators.cache import cache_page
@@ -124,3 +124,20 @@ def navbar(request):
     return {
         'categories': categories,
     }
+
+@login_required(login_url='login')
+def CartView(request):
+    cartItem = request.user.cart_set.all()
+    context={'cartItem':cartItem}
+    return render(request,'base/ProductCart.html',context)
+
+
+@login_required(login_url='login')
+def AddtoCart(request,pk):
+    user = request.user
+    product = Product.objects.get(id=pk)
+    cartProduct = cart.objects.create(
+        user = user,
+        product=product
+    )
+    return redirect('home')

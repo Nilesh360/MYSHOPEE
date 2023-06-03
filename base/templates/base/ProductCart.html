@@ -1,0 +1,16 @@
+{% extends 'main.html' %}
+{% block content %}
+<p>Cart</p>
+<div class="cart-class">
+    {% for cart in cartItem %}
+    <div>
+        <a href="{% url 'product' cart.product.id %}">
+        <h5>{{cart.product.name}}</h5>
+        <p>{{cart.product.price}}</p>
+        </a>
+        <hr>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

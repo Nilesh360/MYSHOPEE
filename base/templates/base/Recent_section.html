@@ -53,7 +53,7 @@
                       <h3>{{product}}</h3>
                       <p>${{product.price}}</p>
                       </a>
-                      <a href="#" class="btn">Add to Cart</a>
+                      <a href="{% url 'add-cart' product.id %}" class="btn">Add to Cart</a>
                       </div>
                   </li>
               </ul>

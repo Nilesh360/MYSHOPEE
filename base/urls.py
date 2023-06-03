@@ -13,4 +13,6 @@ urlpatterns = [
     path('login-page/',views.LoginPage,name="login"),
     path('logout-page/',views.logoutUser,name="logout"),
     path('register/',views.registerPage,name="register"),
+    path('cart/',views.CartView,name="cart-product"),
+    path('AddtoCart/<str:pk>/',views.AddtoCart,name='add-cart'),
 ]
