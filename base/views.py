@@ -23,6 +23,7 @@ def ProductView(request,pk):
     context={'product':product}
     return render(request,'base/Product.html',context)
 
+@login_required(login_url='login')
 def updateProduct(request,pk):
     product = Product.objects.get(id=pk)
     form = ProductForm(instance=product)
@@ -34,6 +35,7 @@ def updateProduct(request,pk):
     context={'form':form}
     return render(request,'base/create_update_product.html',context)
 
+@login_required(login_url='login')
 def deleteProduct(request,pk):
     product = Product.objects.get(id=pk)
     if request.method=='POST':
@@ -42,6 +44,7 @@ def deleteProduct(request,pk):
     context = {'obj':product}
     return render(request,'base/delete_product.html',context)
 
+@login_required(login_url='login')
 def addProduct(request):
     form = ProductForm()
     if request.method=='POST':
@@ -71,6 +74,7 @@ def SearchedProduct(request):
     #response.set_cookie('key1',['val1','val2'])
     #response.delete_cookie('key1')
     return response
+
 
 def LoginPage(request):
     page='login'
