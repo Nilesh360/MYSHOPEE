@@ -1,4 +1,5 @@
 {% extends 'main.html' %}
+{% load static %}
 {% block content %}
 
 <h3>{{product.name}}</h3>
@@ -7,5 +8,6 @@
 <h6>{{product.Category.name}}</h6>
 <a href="{% url 'update-product' product.id %}"><span>Edit</span></a>
 <a href="{% url 'delete-product' product.id %}"><span>Delete</span></a>
+<a href="{% url 'add-cart' product.id %}" class="btns">Add to Cart</a>
 
 {% endblock %}

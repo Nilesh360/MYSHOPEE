@@ -37,7 +37,7 @@
         {% include 'base/filters.html' %}
     </div>
     <div>
-        <h3>{{filter_product_count}} Products Available</h3>
+        <h3>{{filter_products.count }} Products Available </h3>
         <hr>
         {%for product in page %}
         <a href="{% url 'product' product.id %}" title="{{product.name}}">
@@ -59,15 +59,15 @@
             <span class="step-links">
                 <span class="current-page">{{ page.number }}</span>
                 {% if page.has_previous %}
-                    <a class="page_button" href="?q={{current_category}}&page=1">&laquo; first</a>
-                    <a class="page_button" href="?q={{current_category}}&page={{ page.previous_page_number }}">previous</a>
+                    <a class="page_button" href="?q={{search_param}}&page=1">&laquo; first</a>
+                    <a class="page_button" href="?q={{search_param}}&page={{ page.previous_page_number }}">previous</a>
                 {% endif %}
         
                 
         
                 {% if page.has_next %}
-                    <a class="page_button" href="?q={{current_category}}&page={{ page.next_page_number }}">next</a>
-                    <a class="page_button" href="?q={{current_category}}&page={{ page.paginator.num_pages }}">last &raquo;</a>
+                    <a class="page_button" href="?q={{search_param}}&page={{ page.next_page_number }}">next</a>
+                    <a class="page_button" href="?q={{search_param}}&page={{ page.paginator.num_pages }}">last &raquo;</a>
                 {% endif %}
             </span>
         </div>

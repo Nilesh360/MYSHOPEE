@@ -9,13 +9,18 @@ from .models import Product,Category,User,cart
 from .forms import ProductForm
 from django.core.paginator import Paginator
 from django.views.decorators.cache import cache_page
+from rest_framework.decorators import APIView,api_view
+from django.utils.decorators import method_decorator
 
 # Create your views here.
 
 def home(request):
     products = Product.objects.all()
     category = Category.objects.all()
-    context={'products':products,'category':category}
+    carts = cart.objects.all()
+ #   if request.user.is_authenticated:
+  #      carts = request.user.cart_set.all()
+    context={'products':products,'category':category,'carts':carts}
     return render(request,'base/home.html',context)
 
 def ProductView(request,pk):
@@ -56,88 +61,112 @@ def addProduct(request):
     return render(request,'base/create_update_product.html',context)
 
 
-def SearchedProduct(request):
-    q = request.GET.get('q') if request.GET.get('q') != None else ''
-    filter_products = Product.objects.filter(
-        Q(name__icontains=q) |
-        Q(description__icontains=q) |
-        Q(category__name__icontains=q)
-    )
-    category = Category.objects.all()
-    current_category = q
-    filter_product_count = filter_products.count()
-    paginator = Paginator(filter_products, 10)
-    page_number = request.GET.get('page')
-    page = paginator.get_page(page_number)
-    context={'filter_product_count':filter_product_count,'filter_products':filter_products,'category':category,'page': page,'current_category':current_category,}
-    response= render(request,'base/filtered_product.html',context)
-    #response.set_cookie('key1',['val1','val2'])
-    #response.delete_cookie('key1')
-    return response
-
-
-def LoginPage(request):
-    page='login'
-    if request.user.is_authenticated:
-        return redirect('home')
-    if request.method=='POST':
-        print(request.COOKIES.get('csrftoken'))
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        try:
-            user = User.objects.get(username=username)
-            user = authenticate(request,username=username,password=password)
-            if user is not None:
-                login(request,user)
-                return redirect('home')
-            else:
-                messages.error(request,'Username or password does not exists')
-        except:
-            messages.error(request,'User does not exists')
-    context={'page':page}
-    return render(request,'base/login_register.html',context)
-
-
-def logoutUser(request):
-    logout(request)
-    request.session.flush()
-    return redirect('home')
-
-def registerPage(request):
-    page='register'
-    form = UserCreationForm()
-    if request.method=='POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.username = user.username
-            user.save()
-            login(request,user)
-            return redirect('home')
-        else:
-            messages.error(request,"An error occurred during registration")
-    context = {'page':page,'form':form}
-    return render(request,'base/login_register.html',context)
-
 def navbar(request):
     categories = Category.objects.all()
     return {
         'categories': categories,
     }
 
-@login_required(login_url='login')
-def CartView(request):
-    cartItem = request.user.cart_set.all()
-    context={'cartItem':cartItem}
-    return render(request,'base/ProductCart.html',context)
 
+#---------------------------------->Class based views <--------------------------------------
 
-@login_required(login_url='login')
-def AddtoCart(request,pk):
-    user = request.user
-    product = Product.objects.get(id=pk)
-    cartProduct = cart.objects.create(
-        user = user,
-        product=product
-    )
-    return redirect('home')
+class registerPage(APIView):
+    def post(self,request):
+        page='register'
+        form = UserCreationForm()
+        if request.method=='POST':
+            form = UserCreationForm(request.POST)
+            if form.is_valid():
+                user = form.save(commit=False)
+                user.username = user.username
+                user.save()
+                login(request,user)
+                return redirect('home')
+            else:
+                messages.error(request,"An error occurred during registration")
+                return self.get(request)
+
+    def get(self,request):
+        page='register'
+        form = UserCreationForm()
+        context = {'page':page,'form':form}
+        return render(request,'base/login_register.html',context)
+    
+
+class AddtoCart(APIView):
+    @method_decorator(login_required(login_url='login'))
+    def get(self,request,pk):
+        user = request.user
+        product = Product.objects.get(id=pk)
+        chk = cart.objects.filter(user = user , product=product)
+        if chk.count()==0:
+            cartProduct = cart.objects.create(
+                user = user,
+                product=product
+            )
+        return redirect('cart-product')
+    
+class logoutUser(APIView):
+    @method_decorator(login_required(login_url='login'))
+    def get(self,request):
+        logout(request)
+        request.session.flush()
+        return redirect('home')
+
+class LoginPage(APIView):
+    def post(self,request):
+        page='login'
+        if request.user.is_authenticated:
+            return redirect('home')
+        if request.method=='POST':
+            #print(request.COOKIES.get('csrftoken'))
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            try:
+                user = User.objects.get(username=username)
+                user = authenticate(request,username=username,password=password)
+                if user is not None:
+                    login(request,user)
+                    return redirect('home')
+                else:
+                    messages.error(request,'Username or password does not exists')
+                    return self.get(request)
+            except:
+                messages.error(request,'User does not exists')
+                return self.get(request)
+            
+    def get(self,request):
+        page='login'
+        context={'page':page}
+        return render(request,'base/login_register.html',context)
+    
+class SearchedProduct(APIView):
+    category = Category.objects.all()
+    def get(self,request):
+        q = request.GET.get('q') if request.GET.get('q') != None else ''
+        filter_products = self.get_queryset(Product,q)        
+        search_param = q
+        paginator = Paginator(filter_products, 10)   #10 search item on single page
+        page_number = request.GET.get('page')
+        page = paginator.get_page(page_number)
+        context={'filter_products':filter_products,'category':self.category,'page': page,'search_param':search_param}
+        response= render(request,'base/filtered_product.html',context)
+        #response.set_cookie('key1',['val1','val2'])
+        #response.delete_cookie('key1')
+        return response
+    
+    def get_queryset(self,Product,key):
+        filter_products = Product.objects.filter(
+            Q(name__icontains=key) |
+            Q(description__icontains=key) |
+            Q(category__name__icontains=key)
+        )
+        return filter_products
+    
+class CartView(APIView):
+    @method_decorator(login_required(login_url='login'))
+    def get(self,request):
+        cartItem = request.user.cart_set.all()
+        context={'cartItem':cartItem}
+        return render(request,'base/ProductCart.html',context)
+

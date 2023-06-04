@@ -1,6 +1,6 @@
 {% extends 'main.html' %}
 {% block content %}
-<p>Cart</p>
+<p>Cart {{cartItem.count}}</p>
 <div class="cart-class">
     {% for cart in cartItem %}
     <div>
